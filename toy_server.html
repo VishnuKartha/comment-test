@@ -279,7 +279,7 @@
   <main class="server-card" id="toyServerCard">
     <header class="header">
       <div class="title-group">
-        <h1>PicoNode v0.1</h1>
+        <h1>PicoNode v0.2</h1>
         <p>Ultra-compact toy microserver</p>
       </div>
       <div class="badge" id="statusBadge">
@@ -377,12 +377,30 @@
       consoleLogs.scrollTop = consoleLogs.scrollHeight;
     }
 
+    function playBeep(freq = 880, duration = 0.08) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
     pingBtn.addEventListener('click', () => {
       if (!isOnline) {
         logMessage('⚠️ Error: Server is offline');
+        playBeep(220, 0.12);
         return;
       }
 
+      playBeep(920, 0.08);
       packets++;
       packetCount.textContent = packets;
       const latency = (Math.random() * 3 + 2).toFixed(1);
@@ -402,6 +420,7 @@
     });
 
     togglePowerBtn.addEventListener('click', () => {
+      playBeep(440, 0.12);
       logMessage('🔄 Rebooting PicoNode...');
       isOnline = false;
       statusText.textContent = 'REBOOTING';
