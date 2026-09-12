@@ -145,15 +145,22 @@
     }
 
     .pin {
-      width: 6px;
-      height: 6px;
-      border-radius: 1px;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
       background: #334155;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pin:hover {
+      transform: scale(1.25);
+      border-color: #64748b;
     }
 
     .pin.active {
       background: #38bdf8;
-      box-shadow: 0 0 6px #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
     }
 
     .chip {
@@ -205,6 +212,35 @@
     }
 
     /* Interactive Section */
+    .console-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+      padding: 0 0.2rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.68rem;
+      font-family: 'Fira Code', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      color: #f43f5e;
+      background: rgba(244, 63, 94, 0.12);
+    }
+
     .terminal-console {
       background: #05070d;
       border: 1px solid #1e293b;
@@ -290,12 +326,12 @@
 
     <section class="hardware-chassis" aria-label="Toy Hardware Diagram">
       <div class="chassis-top">
-        <div class="pin-grid">
-          <div class="pin active"></div>
-          <div class="pin active"></div>
-          <div class="pin"></div>
-          <div class="pin active"></div>
-          <div class="pin"></div>
+        <div class="pin-grid" id="pinGrid" title="Click pins to toggle GPIO states">
+          <div class="pin active" data-pin="D0" title="GPIO D0"></div>
+          <div class="pin active" data-pin="D1" title="GPIO D1"></div>
+          <div class="pin" data-pin="D2" title="GPIO D2"></div>
+          <div class="pin active" data-pin="D3" title="GPIO D3"></div>
+          <div class="pin" data-pin="D4" title="GPIO D4"></div>
         </div>
         <span style="font-size: 0.7rem; color: #64748b; font-family: 'Fira Code', monospace;">GPIO: 3.3V &bull; 8MHz</span>
       </div>
@@ -324,6 +360,10 @@
       </div>
     </section>
 
+    <div class="console-header">
+      <span>TERMINAL LOGS</span>
+      <button class="clear-btn" id="clearLogsBtn" type="button" title="Clear terminal logs">[clear]</button>
+    </div>
     <div class="terminal-console" id="consoleLogs" aria-live="polite">
       <p>[00:00] PicoNode initialized on port 80</p>
       <p>[00:01] Listening for tiny HTTP requests...</p>
@@ -436,6 +476,21 @@
         serverLed.style.boxShadow = '0 0 10px var(--accent-green)';
         logMessage('✨ PicoNode ready on port 80');
       }, 1200);
+    });
+
+    document.querySelectorAll('.pin').forEach(pin => {
+      pin.addEventListener('click', () => {
+        const isActive = pin.classList.toggle('active');
+        const pinName = pin.getAttribute('data-pin') || 'GPIO';
+        playBeep(isActive ? 1050 : 520, 0.05);
+        logMessage(`[GPIO] Pin ${pinName} set to ${isActive ? 'HIGH (1)' : 'LOW (0)'}`);
+      });
+    });
+
+    const clearLogsBtn = document.getElementById('clearLogsBtn');
+    clearLogsBtn.addEventListener('click', () => {
+      consoleLogs.innerHTML = '';
+      playBeep(350, 0.04);
     });
   </script>
 </body>
